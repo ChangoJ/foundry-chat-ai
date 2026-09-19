@@ -4,7 +4,7 @@ type: 'feature'
 created: '2026-09-19'
 status: 'done'
 route: 'oneshot'
-review_loop_iteration: 0
+review_loop_iteration: 1
 context: []
 ---
 
@@ -56,3 +56,22 @@ context: []
 - `low` → deferred — metadata en `page.tsx` aún muestra "Create Next App": pre-existente del scaffold, fuera de scope de esta historia.
 - `false` — `void handleSubmit()` swallows rejections: `sendMessage` del hook captura todo internamente y expone `error` en estado; nunca relanza.
 - `medium` → patched — `whitespace-pre-wrap` ausente: añadido a la burbuja de mensaje para preservar saltos de línea de respuestas del agente.
+- `low` → patched — Enter durante composición IME (CJK) disparaba submit con `isComposing=true`: añadido `&& !e.nativeEvent.isComposing` al guard de Enter en `MessageInput.handleKeyDown`.
+- `low` → cleanup — entrada stale en `deferred-work.md` sobre "metadata Create Next App": metadata ya actualizada en story 3.3; entrada removida.
+
+## Review Findings
+
+- [x] [Review][Patch] Enter durante composición IME (CJK) disparaba submit [src/modules/chat/presentation/components/message-input.tsx:21] — `handleKeyDown` no verificaba `e.nativeEvent.isComposing`; en teclados CJK la confirmación de composición emite `Enter` con `isComposing=true`, disparando submit con carácter parcial. Añadido `&& !e.nativeEvent.isComposing`.
+- [x] [Review][Cleanup] Entrada stale "metadata Create Next App" en `deferred-work.md` — metadata ya corregida en story 3.3; entrada removida.
+
+**Rechazados:**
+- `false` — diff stale vs working tree: el diff es snapshot del commit de story 3.2; story 3.3 aplicó patches encima; código actual correcto.
+- `false` — `scrollIntoView` en `[messages, isLoading]`: intencional per spec-3-3 para hacer scroll al aparecer el indicador de carga.
+- `false` — `<input type="text">` + Shift+Enter guard vacuo: spec dice "envía con Enter sin Shift"; guard correcto para MVP.
+- `false` — race `startNewConversation` + `sendMessage`: botón `disabled={isLoading}`.
+- `false` — `useChatSession` sin `'use client'`: hereda contexto cliente del importador; no requiere directiva propia.
+- `false` — botón "Enviar" sin `aria-label`: texto "Enviar" es descriptivo.
+- `false` — `setValue('')` antes de `await sendMessage`: `sendMessage` nunca relanza; campo no se pierde.
+- `false` — collision de `message.id`: IDs generados con `crypto.randomUUID()`.
+- `false` — `useChatSession` throws en mount: hook usa `.catch()` internamente; nunca propaga throws.
+- `false` — `ChatView` no lee `error`: código actual SÍ consume y muestra `error` (story 3.3).

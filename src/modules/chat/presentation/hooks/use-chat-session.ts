@@ -17,13 +17,14 @@ async function initSession(): Promise<string> {
   });
   const data = (await response.json()) as { conversationId?: string; error?: string };
   if (!response.ok) throw new Error(data.error ?? 'Error al inicializar la conversación');
-  return data.conversationId as string;
+  if (!data.conversationId) throw new Error('Respuesta sin conversationId');
+  return data.conversationId;
 }
 
 export function useChatSession(): UseChatSessionReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

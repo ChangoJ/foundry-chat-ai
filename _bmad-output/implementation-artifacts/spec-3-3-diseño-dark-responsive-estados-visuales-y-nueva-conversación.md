@@ -4,7 +4,7 @@ type: 'feature'
 created: '2026-09-19'
 status: 'done'
 route: 'oneshot'
-review_loop_iteration: 0
+review_loop_iteration: 1
 context: []
 ---
 
@@ -42,6 +42,7 @@ context: []
 - `chat-view.tsx` — consume `error` y `startNewConversation`; strip superior con botón `type="button"` "Nueva conversación" deshabilitado mientras carga; error con `role="alert"`; cambiado `flex-1` → `h-screen` para garantizar altura completa independiente del `min-h-full` del body.
 - `message-list.tsx` — añadida prop `isLoading: boolean`; tres puntos con `animate-bounce` y `animationDelay` inline para efecto escalonado; `useEffect` ahora escucha `[messages, isLoading]` para hacer scroll también cuando aparece el indicador.
 - `npx tsc --noEmit` pasa sin errores antes y después de los patches.
+- `npm run build` pasa sin errores ni warnings de TypeScript: `/ ` y `/_not-found` como `○ (Static)`; `/api/chat` como `ƒ (Dynamic)`. Confirmado tras todos los patches de stories 3.x.
 
 ## Spec Change Log
 
@@ -57,3 +58,23 @@ context: []
 - `low` → deferred — negative animation-delay frágil ante cambios de Tailwind: el efecto actual funciona; añadido a deferred-work.md.
 - `medium` → patched — sin `role="alert"` en error: añadido para que lectores de pantalla anuncien el error al aparecer.
 - `medium` → patched — `flex-1` en ChatView no garantizaba altura completa con `min-h-full` en body: cambiado a `h-screen` para altura 100vh explícita.
+- `low` → patched — `h-screen` overflow en mobile cuando teclado virtual abre (100vh ≠ dynamic viewport height): cambiado a `h-dvh` para usar CSS `100dvh`; soportado por Tailwind v4 y navegadores modernos.
+- `low` → cleanup — items spec-3-1 y spec-3-3 estaban mal ubicados bajo sección "spec-1-1" en `deferred-work.md`: reorganizados a secciones `## Deferred from: code review of spec-3-1` y `## Deferred from: code review of spec-3-3`.
+- `medium` → verified — `next build` no documentado en Implementation Notes: build pasa sin errores; documentado.
+- `low` → deferred — `aria-live="polite"` ausente en contenedor de puntos de carga: lectores de pantalla no anuncian el estado de loading. Diferido a deferred-work.md.
+
+## Review Findings
+
+- [x] [Review][Patch] `h-screen` overflow en mobile con teclado virtual [src/modules/chat/presentation/components/chat-view.tsx:11] — `100vh` no adapta al viewport visible en iOS/Android cuando el teclado virtual abre. Cambiado `h-screen` → `h-dvh` (CSS `100dvh`; Tailwind v4 + navegadores modernos).
+- [x] [Review][Cleanup] Items spec-3-1 y spec-3-3 mal ubicados bajo sección "spec-1-1" en `deferred-work.md` — reorganizados a secciones propias; entrada stale de metadata (spec-3-2) removida.
+- [x] [Review][Verify] `next build` pasa sin errores ni warnings — `/ ` y `/_not-found` estáticos; `/api/chat` dinámico. AC "next build debe pasar" confirmado; documentado en Implementation Notes.
+- [x] [Review][Defer] `aria-live="polite"` ausente en contenedor de puntos de carga — diferido a deferred-work.md.
+
+**Rechazados:**
+- `false` — race `startNewConversation` + `sendMessage`: botón `disabled={isLoading}`.
+- `false` — `sendMessage` noop silencioso: UX concern diferido en spec-3-1; no duplicado.
+- `false` — loading dots en lista vacía durante init: comportamiento aceptable.
+- `false` — botón "Nueva conversación" sin confirmación: no requerido por spec.
+- `false` — `role="alert"` re-anuncia con misma string: cada ciclo error es desmonte/montaje; correcto.
+- `false` — `color-scheme: dark` ausente en CSS `:root`: `viewport.colorScheme: 'dark'` emite meta equivalente.
+- `false` — `LayoutProps<"/">` sin import: Next.js 16.x lo provee vía `.next/types/`; `next build` pasa.

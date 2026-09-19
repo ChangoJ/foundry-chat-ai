@@ -8,7 +8,7 @@ export function ChatView() {
   const { messages, sendMessage, isLoading, error, startNewConversation } = useChatSession();
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-900">
+    <div className="flex h-dvh flex-col bg-zinc-900">
       <div className="flex justify-end border-b border-zinc-800 p-3">
         <button
           type="button"

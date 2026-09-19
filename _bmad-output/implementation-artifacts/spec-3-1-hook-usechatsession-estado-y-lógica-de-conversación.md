@@ -4,7 +4,7 @@ type: 'feature'
 created: '2026-09-19'
 status: 'done'
 route: 'oneshot'
-review_loop_iteration: 0
+review_loop_iteration: 1
 context: []
 ---
 
@@ -52,3 +52,25 @@ context: []
 - `false` — `isLoading` única flag: el spec define exactamente `isLoading: boolean`; distinción de estados es fuera de scope.
 - `low` → deferred — sin AbortController: la petición HTTP en-vuelo no se cancela al desmontar; crea conversaciones huérfanas en dev. Diferido a deferred-work.md.
 - `low` → deferred — strings de error mezclados (es/en): normalización de idioma de errores diferida, requiere decisión de i18n y ajustes al route handler.
+- `medium` → patched — `initSession` sin guard para `conversationId` ausente: si el servidor devuelve 200 sin `conversationId`, la cast `as string` almacenaba `undefined` en estado React. Añadido `if (!data.conversationId) throw new Error('Respuesta sin conversationId')` antes del return; eliminada la cast insegura.
+- `low` → patched — `isLoading` initial state `false`: causaba un render inicial donde el input estaba habilitado y `conversationId` era null; cambiado a `useState(true)` para deshabilitar el input desde el primer render.
+- `low` → deferred — `sendMessage` noop silencioso tras init fallido: tras un init fallido `isLoading=false` y el input queda habilitado; si el usuario envía, `sendMessage` retorna sin feedback. Diferido a deferred-work.md.
+- `low` → deferred — tests unitarios para `useChatSession` (initSession, sendMessage, startNewConversation): sin cobertura de los paths de error y happy paths. Diferido a deferred-work.md; cerrar al configurar test runner.
+
+## Review Findings
+
+- [x] [Review][Patch] `initSession` sin guard para `conversationId` ausente [src/modules/chat/presentation/hooks/use-chat-session.ts:20] — si el servidor devuelve HTTP 200 sin campo `conversationId`, la cast `as string` almacenaba `undefined` tipado como `string` en estado React; llamadas posteriores a `sendMessage` enviaban `conversationId: undefined` al Route Handler. Añadido `if (!data.conversationId) throw new Error('Respuesta sin conversationId')`.
+- [x] [Review][Patch] `isLoading` initial state `false` — flash de 1 frame con input habilitado y `conversationId=null` [use-chat-session.ts:26] — cambiado a `useState(true)` para deshabilitar el input desde el primer render.
+- [x] [Review][Defer] `sendMessage` noop silencioso tras init fallido — diferido a deferred-work.md; setear error descriptivo cuando `conversationId===null` y el input está habilitado.
+- [x] [Review][Defer] Tests unitarios para `useChatSession` — diferido a deferred-work.md; cerrar al configurar test runner.
+
+**Rechazados:**
+- `false` — `UseChatSessionReturn` no exportado: spec no lo requiere.
+- `false` — `conversationId` no en return type público: detalle de implementación, fuera de contrato spec.
+- `false` — `ChatRequestDto`/`ChatResponseDto` no importados: structural typing de TS valida los literales; spec triage confirmado.
+- `false` — mensaje de usuario no revertido en error: diseño correcto per spec triage.
+- `false` — `sendMessage('')` sin guard en el hook: MessageInput guarda antes de llamar.
+- `false` — server devuelve nuevo `conversationId` en cada respuesta: route.ts siempre devuelve el mismo id recibido.
+- `false` — llamadas concurrentes a `sendMessage`: UI guarda con `isLoading=true`.
+- `reject` — `review_loop_iteration: 0` inconsistente: fix edita spec (frozen).
+- `reject` — AbortController: pre-existente en deferred-work.md; no duplicado.
