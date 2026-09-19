@@ -50,5 +50,5 @@ development_status:
   epic-3: in-progress
   3-1-hook-usechatsession-estado-y-lógica-de-conversación: review
   3-2-componentes-de-chat-chatview-messagelist-messageinput: review
-  3-3-diseño-dark-responsive-estados-visuales-y-nueva-conversación: backlog
+  3-3-diseño-dark-responsive-estados-visuales-y-nueva-conversación: review
   epic-3-retrospective: optional
