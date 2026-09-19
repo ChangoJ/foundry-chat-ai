@@ -42,8 +42,8 @@ development_status:
   1-3-contratos-de-aplicación-puerto-dtos-y-casos-de-uso: review
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-foundryagentservice-implementación-de-la-integración-azure: backlog
+  epic-2: in-progress
+  2-1-foundryagentservice-implementación-de-la-integración-azure: review
   2-2-di-container-y-route-handler-post-api-chat: backlog
   epic-2-retrospective: optional
 
