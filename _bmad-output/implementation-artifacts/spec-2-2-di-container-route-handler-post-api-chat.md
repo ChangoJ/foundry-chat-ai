@@ -64,3 +64,19 @@ context: []
 | 6 | `startConversation` devuelve 200 en vez de 201 | `false` | AC especifica explícitamente status 200 para ambos casos |
 | 7 | `FoundryAgentService` construido sin args de config | `false` | Diseño intencional per AD-2; env vars en constructor es el patrón de architecture spine |
 | 8 | Sin `export const dynamic = 'force-dynamic'`; sin OPTIONS handler | `false` | Build muestra `ƒ (Dynamic)` — Next.js detecta automáticamente rutas API POST como dinámicas; CORS fuera del alcance del PRD |
+
+## Review Findings
+
+- [x] [Review][Patch] `null` JSON body causa TypeError fuera de try/catch [src/app/api/chat/route.ts:16] — `body = null` pasa el primer try/catch (JSON válido), luego `const { content, conversationId } = null` lanza TypeError en línea 16 que está fuera de ambos bloques de captura → Next.js retorna 500 en lugar de 400.
+- [x] [Review][Patch] Sin `console.error` en el catch genérico (500) [src/app/api/chat/route.ts:34] — errores inesperados retornan 500 con "Internal server error" sin ningún log servidor; imposible diagnosticar fallos en producción.
+- [x] [Review][Defer] Frozen spec muestra singletons const pero implementación usa lazy-init — deferred: código correcto (const singletons romperían next build); fix requiere actualizar el frozen block de la spec (agent-context); documentado en Implementation Notes.
+- [x] [Review][Defer] Route handler y chat.container sin cobertura de test — deferred: test runner explícitamente diferido en architecture spine.
+- [x] [Review][Defer] `getSendMessageUseCase()` guard mismatch (non-null assertion) — deferred: pre-existente en deferred-work.md; no duplicado.
+
+**Rechazados:**
+- `false` — Azure credentials en client bundle: ningún componente cliente importa de `core/di/` ni `infrastructure/`; aislamiento garantizado por estructura Next.js.
+- `false` — `{ status: 200 }` explícito: `Response.json()` defaultea a 200; comportamiento correcto.
+- `false` — `ChatResponseDto` orphan: Route Handler lo consume implícitamente; use cases retornan primitivos per AD-7.
+- `false` — spec `status:done` vs sprint `review`: capas de tracking distintas.
+- `low/reject` — `ChatResponseDto` no usado como tipo TypeScript en respuestas: cosmético; respuestas correctas per spec; añadir tipos requiere decisión de diseño.
+- `reject` — error swallowing: pre-existente en deferred-work.md desde story 1.2; no duplicado.

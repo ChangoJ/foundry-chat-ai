@@ -74,3 +74,18 @@ context: []
 - `low/defer` — "sin cause chaining": mejora válida para story 2.1 cuando FoundryConnectionError se lanza con contexto real de Azure; entrada añadida a deferred-work.md.
 - `false` — "sin barrel index.ts": la spine no lo requiere; imports directos suficientes para módulo único.
 - `false` — "Date no serializable a JSON": mensajes en React state únicamente (AD-6); nunca se serializan a storage.
+
+## Review Findings
+
+- [x] [Review][Patch] `.gitkeep` no eliminados en `domain/entities/` y `domain/errors/` [src/modules/chat/domain/entities/.gitkeep, src/modules/chat/domain/errors/.gitkeep] — los archivos `.gitkeep` permanecen junto a los `.ts` reales; la nota de Implementation Notes ("git los sobrescribirá") es incorrecta.
+- [x] [Review][Defer] Ruta instanceof `FoundryConnectionError` (502) sin cobertura de test — deferred: test runner explícitamente diferido en architecture spine; añadido a deferred-work.md.
+- [x] [Review][Defer] `Message` role-based layout sin verificación — deferred: idem; la lógica de `justify-end`/`justify-start` en `MessageList` queda sin test hasta configurar el runner.
+
+**Rechazados:**
+- `false` — `Object.setPrototypeOf` faltante: tsconfig target=ES2017 emite clases nativas; workaround solo para ES5; verificado en tsconfig.json.
+- `false` — spec `status:done` vs sprint `review`: capas de tracking distintas (spec = implementación completa; sprint-status = lifecycle de revisión); sin contradicción.
+- `false` — ECH claims cause/localization: el commit message no hace esas claims; interpretación del reviewer.
+- `low/reject` — empty string guards en Message/AppError/FoundryConnectionError: interfaz pura / base class; validación es responsabilidad del factory; ningún caller pasa strings vacíos en el codebase.
+- `reject` — phrasing "del mismo módulo" en Implementation Notes: fix edita esta spec.
+- `reject` — dos archivos vs spine seed comment: fix edita agent-context.
+- `reject` — `review_loop_iteration:0`: fix edita esta spec.

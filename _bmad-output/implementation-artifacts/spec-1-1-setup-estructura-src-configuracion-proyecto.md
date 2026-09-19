@@ -3,6 +3,7 @@ title: '1.1 — Setup de estructura src/ y configuración del proyecto'
 type: 'chore'
 created: '2026-09-19'
 status: 'done'
+review_status: 'done'
 route: 'oneshot'
 review_loop_iteration: 0
 context: []
@@ -70,3 +71,20 @@ context: []
 - `defer` — "infrastructure/ sin subdirectorios": subdirectorios creados en Epic 2 story 2.1 (foundry/); ya capturado en los epics.
 - `false` — ".env.example sin variables de identidad Azure": la architecture spine documenta explícitamente que DefaultAzureCredential no requiere variables adicionales (Azure CLI en local, Managed Identity en cloud).
 - `defer` — "lint script sin target + sin tests": script eslint pre-existente del scaffold; entrada añadida a deferred-work.md. Tests deferred por architecture spine.
+
+## Review Findings
+
+- [x] [Review][Defer] Script `lint` no-op pre-existente [package.json:9] — deferred: `eslint` sin target imprime usage en ESLint v9; no causado por esta historia; ya capturado en deferred-work.md.
+- [x] [Review][Defer] `@azure/ai-projects` arrastra `openai` SDK y `@azure/storage-blob` como deps transitivas de producción [package.json, package-lock.json] — deferred: consecuencia de la decisión arquitectónica de usar `@azure/ai-projects`; `openai@6.49.0` y `@azure/storage-blob` son deps runtime no-opcionales del SDK; informacional para evaluación futura de alternativas más ligeras.
+- [x] [Review][Patch] `engines` field faltante en `package.json` — los paquetes Azure SDK declaran `node>=22.0.0`; sin campo `engines` en el root, desarrolladores en Node 18/20 no reciben advertencia en install time.
+
+**Rechazados:**
+- `false` — `.gitignore !.env.example`: negación necesaria para que `.env*` no gitignore el template; comportamiento correcto.
+- `false` — `debug`+`ms` promovidos de dev: comportamiento correcto de npm; `https-proxy-agent` (dep runtime de los Azure SDKs) los requiere en producción.
+- `false` — `zod` devOptional: `openai` lo declara como peer dep opcional; npm lo clasifica correctamente; openai maneja su ausencia sin errores.
+- `false` — `tsconfig.json include` no cubre `src/`: `"include": ["**/*.ts", ...]` cubre todos los subdirectorios vía glob `**`; verificado.
+- `low/reject` — `@azure/identity` + `msal-browser`: instalado pero nunca importado; Next.js no lo incluye en el bundle; fix requiere cambio de SDK.
+- `low/reject` — mismatch prefijo commit `feat` vs `chore`: cosmético; el historial de commits es inmutable sin reescritura.
+- `low/reject` — sin log de `npm run build`: concern de proceso; fix requiere cambios de infraestructura CI fuera del diff.
+- `low/reject` — gap en Review Triage Log (`.gitkeep` removidos): el fix edita esta spec bajo revisión.
+- `low/reject` — paper trail `deferred-work.md` en mismo commit: el fix edita archivos de tracking de agentes.

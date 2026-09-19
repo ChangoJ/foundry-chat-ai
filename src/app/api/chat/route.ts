@@ -13,6 +13,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
   const { content, conversationId } = body;
 
   try {
@@ -31,6 +35,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (error instanceof FoundryConnectionError) {
       return Response.json({ error: error.message }, { status: 502 });
     }
+    console.error('[POST /api/chat]', error);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

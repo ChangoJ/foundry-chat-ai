@@ -59,3 +59,17 @@ context: []
 - `false` — "constructor lanza Error genérico": intencional; fallo de configuración en startup ≠ fallo de conexión en runtime.
 - `false` — "conversationId sin validar": misma razón que content; validación en Route Handler.
 - `low/defer` — "errores de config enmascarados como FOUNDRY_CONNECTION_ERROR": misma causa raíz que causa chaining; ya en deferred-work.md.
+
+## Review Findings
+
+- [x] [Review][Defer] `startConversation()` y `sendMessage()` sin cobertura de test — deferred: test runner explícitamente diferido en architecture spine; los SDK call paths (incluyendo la conversión a FoundryConnectionError) quedan sin verificación hasta añadir el runner.
+- [x] [Review][Defer] Error swallowing en catch blocks (`throw new FoundryConnectionError()` sin causa) — deferred: pre-existente en deferred-work.md desde story 1.2; no duplicado.
+
+**Rechazados:**
+- `false` — `response.output_text` nullable: SDK tipado como `string` no-nullable; spec triage ya lo abordó.
+- `false` — `conversations.items.create`/`responses.create` en mismo try/catch: comportamiento intencional per Implementation Notes ("si el primero falla, el mensaje no se añade… comportamiento correcto").
+- `false` — content multi-part: patrón SDK confirmado en investigación; `string` es tipo válido para content.
+- `low/reject` — `conversation.id` empty string: SDK garantiza UUIDs válidos; guard defensivo especulativo.
+- `low/reject` — AIProjectClient constructor throw: capturado por el try/catch del Route Handler; retorna 500; fix añade complejidad innecesaria.
+- `reject` — `review_loop_iteration:0` inconsistente: fix edita esta spec.
+- `reject` — spec `status:done` vs sprint `review`: capas de tracking distintas.

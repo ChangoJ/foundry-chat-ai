@@ -85,3 +85,21 @@ context: []
 - `low` — "IAgentService sin JSDoc": cosmético; contratos documentados en spec y spine. No añadido a deferred-work.
 - `false` — "ChatResponseDto.content como string": text-only per PRD.
 - `false` — "sin application/index.ts": mismo razonamiento que barrel exports.
+
+## Review Findings
+
+- [x] [Review][Defer] `ChatRequestDto.content: string | null` contradice la Consistency Conventions table del architecture spine (que define `content: string`) [src/modules/chat/application/dtos/chat.dto.ts:2] — deferred: código correcto per spec frozen con justificación explícita; el fix requiere actualizar la architecture spine (agent-context); registrado para sincronización futura.
+- [x] [Review][Defer] `StartConversationUseCase.execute()` sin cobertura de test en el Route Handler — deferred: test runner explícitamente diferido en architecture spine.
+- [x] [Review][Defer] `SendMessageUseCase.execute()` sin cobertura de test en el Route Handler — deferred: idem; regresión de orden de argumentos sería invisible sin tests.
+- [x] [Review][Defer] Sin enforcement de import-boundary en `application/` (no hay regla ESLint `no-restricted-imports`) — deferred: requiere configuración del ESLint target; relacionado con tooling deferred.
+
+**Rechazados:**
+- `false` — `ChatResponseDto` orphan: Route Handler (story 2.2) lo consume; use cases retornan primitivos per AD-7; correcto.
+- `false` — `StartConversationUseCase` pass-through sin valor: diseño intencional per spec triage log (indirección para testing y extensión).
+- `false` — null states en `ChatRequestDto`: spec triage lo aceptó; Route Handler discrimina null/null vs string/string; estados mixtos inválidos rechazados en handler.
+- `false` — null propagation en use cases: TypeScript strict mode previene null en `execute(conversationId: string, content: string)`; Route Handler valida antes de llamar.
+- `false` — spec `status:done` vs sprint `review`: capas de tracking distintas.
+- `low/reject` — no JSDoc en `IAgentService`: cosmético, ya triageado en spec.
+- `reject` — JSDoc no en deferred-work: fix edita agent-context.
+- `reject` — `tsc --noEmit` auto-asertado: process concern, fix requiere CI infra.
+- `reject` — imports relativos vs alias: low, estilo; intra-capa es válido y no causa defectos.
