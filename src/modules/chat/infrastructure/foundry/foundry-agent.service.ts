@@ -19,10 +19,15 @@ export class FoundryAgentService implements IAgentService {
     this.client = new AIProjectClient(endpoint, new DefaultAzureCredential());
   }
 
+  private getAgentClient() {
+    return this.client.getOpenAIClient({
+      azureConfig: { agentName: this.agentName, allowPreview: true },
+    });
+  }
+
   async startConversation(): Promise<string> {
     try {
-      const openAIClient = this.client.getOpenAIClient();
-      const conversation = await openAIClient.conversations.create();
+      const conversation = await this.getAgentClient().conversations.create();
       return conversation.id;
     } catch (error) {
       throw new FoundryConnectionError();
@@ -31,16 +36,13 @@ export class FoundryAgentService implements IAgentService {
 
   async sendMessage(conversationId: string, content: string): Promise<string> {
     try {
-      const openAIClient = this.client.getOpenAIClient();
+      const openAIClient = this.getAgentClient();
 
       await openAIClient.conversations.items.create(conversationId, {
         items: [{ type: 'message', role: 'user', content }],
       });
 
-      const response = await openAIClient.responses.create(
-        { conversation: conversationId },
-        { body: { agent: { name: this.agentName, type: 'agent_reference' } } },
-      );
+      const response = await openAIClient.responses.create({ conversation: conversationId });
 
       return response.output_text;
     } catch (error) {
