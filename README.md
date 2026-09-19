@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# foundry-chat-ai
 
-## Getting Started
+Aplicación de chat con IA construida sobre **Azure AI Foundry** y **Next.js**. Implementa Clean Architecture por módulos: cada capa tiene responsabilidad única y las dependencias solo apuntan hacia adentro (presentación → aplicación → dominio).
 
-First, run the development server:
+---
+
+## Tecnologías
+
+| Categoría | Tecnología | Versión |
+|---|---|---|
+| Framework | Next.js (App Router) | 16.3.5 |
+| UI | React | 19.2.8 |
+| Lenguaje | TypeScript | ^5 |
+| Estilos | Tailwind CSS | ^4 |
+| IA / Azure | @azure/ai-projects | ^2.7.0 |
+| Auth Azure | @azure/identity | ^4 |
+| Linting | ESLint + eslint-config-next | ^9 |
+| Runtime | Node.js | >=22.0.0 |
+
+---
+
+## Requisitos previos
+
+1. **Node.js >= 22** — el Azure SDK lo requiere explícitamente.
+2. **Cuenta de Azure** con un proyecto de Azure AI Foundry creado y un agente desplegado.
+3. **Azure CLI** instalado y sesión activa (`az login`), o credenciales configuradas vía variables de entorno para `DefaultAzureCredential`.
+
+### Instalar Azure CLI (si no lo tienes)
+
+```bash
+# Windows (winget)
+winget install Microsoft.AzureCLI
+
+# Iniciar sesión
+az login
+```
+
+`DefaultAzureCredential` intenta autenticarse en este orden: Azure CLI → Managed Identity → variables de entorno → otros. En desarrollo local, `az login` es suficiente.
+
+---
+
+## Configuración
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Variables de entorno
+
+Copia el archivo de ejemplo y rellena tus valores:
+
+```bash
+cp .env.example .env.local
+```
+
+Edita `.env.local`:
+
+```env
+# URL del endpoint de tu proyecto en Azure AI Foundry
+# Formato: https://<hub>.services.ai.azure.com/api/projects/<project>
+AZURE_AI_FOUNDRY_ENDPOINT=https://<tu-endpoint>.services.ai.azure.com/api/projects/<tu-proyecto>
+
+# Nombre del agente desplegado en ese proyecto
+AZURE_AI_AGENT_NAME=<nombre-de-tu-agente>
+```
+
+> **Dónde encontrar estos valores:**
+> - En [Azure AI Foundry Studio](https://ai.azure.com) → tu proyecto → Overview → copia el "Project endpoint".
+> - El nombre del agente es el que asignaste al crearlo en la sección "Agents" del studio.
+
+### 3. Levantar el servidor de desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en el navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts disponibles
 
-## Learn More
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo con hot reload |
+| `npm run build` | Build de producción |
+| `npm start` | Servidor de producción (requiere build previo) |
+| `npm run lint` | Linting con ESLint |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estructura del proyecto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                        # Next.js App Router — routing y composición
+│   ├── api/chat/route.ts       # Route Handler POST /api/chat
+│   └── page.tsx                # Página principal
+│
+├── core/
+│   └── di/chat.container.ts    # Contenedor de inyección de dependencias
+│
+└── modules/
+    └── chat/
+        ├── domain/             # Entidades, errores (sin dependencias externas)
+        ├── application/        # Casos de uso, DTOs, puertos (interfaces)
+        ├── infrastructure/     # FoundryAgentService — integración Azure SDK
+        └── presentation/       # Componentes React, hook useChatSession
+```
 
-## Deploy on Vercel
+La regla de dependencias es la única invariante arquitectónica:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+presentation → application → domain
+infrastructure → application / domain
+app/ → application  (solo composición)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ninguna capa importa hacia afuera. `domain/` no importa React, Next.js ni SDKs externos.
+
+---
+
+## Solución de problemas
+
+### `AZURE_AI_FOUNDRY_ENDPOINT is not set`
+El servidor arrancó sin las variables de entorno. Verifica que `.env.local` existe y tiene los valores correctos.
+
+### `DefaultAzureCredential: no credentials found`
+No hay sesión de Azure activa. Ejecuta `az login` y vuelve a intentarlo.
+
+### Error 502 en el chat
+El agente de Azure no respondió. Verifica que el agente `AZURE_AI_AGENT_NAME` existe y está desplegado en el proyecto indicado por `AZURE_AI_FOUNDRY_ENDPOINT`.
+
+### Node version mismatch
+Este proyecto requiere Node.js >= 22. Verifica con `node --version` y actualiza si es necesario.
