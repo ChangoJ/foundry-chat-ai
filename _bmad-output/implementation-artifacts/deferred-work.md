@@ -1,5 +1,9 @@
 # Deferred Work
 
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-di-container-route-handler-post-api-chat.md`
+  summary: Mejorar el guard de init() en chat.container.ts para verificar ambas variables (!startUseCase || !sendUseCase)
+  evidence: El guard actual solo chequea startUseCase; sendUseCase se asigna en el mismo bloque así que no es un bug real, pero verificar ambas hace la invariante más explícita y robusta ante futuros cambios al container.
+
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-capa-de-dominio-entidades-y-errores.md`
   summary: Agregar soporte `cause` a AppError/FoundryConnectionError para preservar el stack trace del error original de Azure
   evidence: Sin `cause`, los errores de red o auth de Azure que envuelve FoundryConnectionError pierden su stack trace original. El momento correcto es story 2.1, cuando el error se lanza con contexto real del SDK.

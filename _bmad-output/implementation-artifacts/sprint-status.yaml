@@ -44,7 +44,7 @@ development_status:
 
   epic-2: in-progress
   2-1-foundryagentservice-implementación-de-la-integración-azure: review
-  2-2-di-container-y-route-handler-post-api-chat: backlog
+  2-2-di-container-y-route-handler-post-api-chat: review
   epic-2-retrospective: optional
 
   epic-3: backlog
