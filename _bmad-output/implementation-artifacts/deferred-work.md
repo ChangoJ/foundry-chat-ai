@@ -19,3 +19,11 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-1-setup-estructura-src-configuracion-proyecto.md`
   summary: Corregir script `lint` en package.json para apuntar a `src/` en lugar de ejecutar ESLint sin argumentos
   evidence: El script `"lint": "eslint"` es scaffold pre-existente. En ESLint v9, sin argumentos muestra la ayuda en lugar de lintear el código. No causado por story 1.1, pero debe corregirse antes de que lint sea parte de la verificación de CI.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-hook-usechatsession-estado-y-lógica-de-conversación.md`
+  summary: Añadir AbortController al fetch de inicialización en useChatSession para cancelar peticiones en-vuelo al desmontar el componente
+  evidence: El flag `cancelled` evita actualizaciones de estado tras unmount pero no cancela la petición HTTP; el servidor crea la conversación igualmente y queda huérfana. Mejora de robustez, no en scope de story 3.1.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-hook-usechatsession-estado-y-lógica-de-conversación.md`
+  summary: Normalizar los mensajes de error de useChatSession a un idioma consistente (español o inglés)
+  evidence: El hook genera strings en español para errores de red locales pero reenvía strings en inglés del route handler (ej. 'Internal server error'). El resultado en la UI mezcla idiomas según el origen del error. Fuera de scope de story 3.1 (requiere decisión de i18n y posiblemente ajustes al route handler).

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-19-2026 00:00
-last_updated: 09-19-2026 12:00
+last_updated: 09-19-2026 13:00
 project: foundry-chat-ai
 project_key: NOKEY
 tracking_system: file-system
@@ -47,8 +47,8 @@ development_status:
   2-2-di-container-y-route-handler-post-api-chat: review
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-hook-usechatsession-estado-y-lógica-de-conversación: backlog
+  epic-3: in-progress
+  3-1-hook-usechatsession-estado-y-lógica-de-conversación: review
   3-2-componentes-de-chat-chatview-messagelist-messageinput: backlog
   3-3-diseño-dark-responsive-estados-visuales-y-nueva-conversación: backlog
   epic-3-retrospective: optional
